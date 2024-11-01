@@ -1,5 +1,6 @@
 import { InMemoryUsersRepository } from '@/repositores/in-memory-users-repository'
 import { PrismaUsersRepository } from '@/repositores/prisma/prisma-users-repository'
+import { UserAlreadyExistsError } from '@/services/errors/user-already-exist'
 import { RegisterService } from '@/services/register'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
@@ -24,7 +25,11 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         })
 
     } catch (err) {
-        return reply.status(409).send()
+        if (err instanceof UserAlreadyExistsError) {
+            return reply.status(409).send({ message: "Email already exists." })
+        }
+
+        return reply.status(500).send()
     }
 
     return reply.status(201).send()
