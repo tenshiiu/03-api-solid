@@ -3,6 +3,8 @@ import { CheckInUseCase } from './check-in'
 import { InMemoryCheckInRepository } from '@/repositores/in-memory/in-memory-check-ins-repository'
 import { InMemoryGymsRepository } from '@/repositores/in-memory/in-memory-gyms-repository'
 import { Decimal } from '@prisma/client/runtime/library'
+import { MaxNumberCheckInsError } from './errors/max-number-of-check-ins-error'
+import { MaxDistanceError } from './errors/max-distance-error'
 
 // Testes unitários: Não possuem relação com o banco de dados, são feitos separadamentes para não ocorrer conflitos nos dados
 
@@ -11,19 +13,19 @@ let gymsRepository: InMemoryGymsRepository
 let sut: CheckInUseCase
 
 describe('Check-in Use Case', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         checkInsRepository = new InMemoryCheckInRepository()
         gymsRepository = new InMemoryGymsRepository()
         sut = new CheckInUseCase(checkInsRepository, InMemoryGymsRepository)
 
-        gymsRepository.items.push({
+        await gymsRepository.create({
             id: 'gym-01',
             title: 'JavaScript Gym',
             description: '',
-            phone: '0',
-            latitude: new Decimal(-27.2092052),
-            longitude: new Decimal(-49.6401091),
-        })
+            phone: '',
+            latitude: -27.2092052,
+            longitude: -49.6401091,
+         })
 
         vi.isFakeTimers()
     })
@@ -59,7 +61,7 @@ describe('Check-in Use Case', () => {
             userId: 'user-01',
             userLatitude: -27.2092052,
             userLongitude: -49.6401091,
-        })).rejects.toBeInstanceOf(Error)
+        })).rejects.toBeInstanceOf(MaxNumberCheckInsError)
 
     })
 
@@ -102,6 +104,6 @@ describe('Check-in Use Case', () => {
                 userLatitude: -27.2092052,
                 userLongitude: -49.6401091,
             }),
-        ).rejects.toBeInstanceOf(Error)
+        ).rejects.toBeInstanceOf(MaxDistanceError)
     })
 })
