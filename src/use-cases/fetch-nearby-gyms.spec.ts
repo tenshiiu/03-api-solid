@@ -23,7 +23,7 @@ describe('Fetch Nearby Gyms Use Case', () => {
             longitude: -49.6401091,
           })
 
-          await gymsRepository.create({
+        await gymsRepository.create({
               title: 'Far Gym',
               description: null,
               phone: null,
